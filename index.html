@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Илтгэгчийн академи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --stage:#07080c; --panel:#12141c; --panel2:#1a1d28; --line:#2a2f40;
+  --ink:#f3f5fa; --muted:#a6aec4;
+  --cy:#22d3ee; --cy-d:#0e98ad; --cy-soft:rgba(34,211,238,.14);
+  --mg:#ff3ea5; --mg-d:#c41f78; --mg-soft:rgba(255,62,165,.15);
+  --red:#ff2e2e; --gold:#ffd23f; --grn:#3ee08a; --org:#ff9a3c;
+  --c1:#ffd23f; --c2:#ff9a3c; --c3:#22d3ee; --c4:#3ee08a;
+  --hfont:"Play","IBM Plex Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{color:var(--ink);background:var(--stage);font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;font-size:20px;line-height:1.4;overflow:hidden}
+/* spotlight cones */
+body::before,body::after{content:"";position:fixed;top:-10vh;width:70vw;height:120vh;pointer-events:none;z-index:0;opacity:.55}
+body::before{left:-22vw;background:conic-gradient(from 150deg at 50% 0%,transparent 0deg,rgba(34,211,238,.13) 14deg,rgba(255,255,255,.07) 22deg,transparent 34deg)}
+body::after{right:-22vw;background:conic-gradient(from 176deg at 50% 0%,transparent 0deg,rgba(255,62,165,.12) 12deg,rgba(255,255,255,.06) 20deg,transparent 32deg)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* ===== Header ===== */
+.top{position:fixed;inset:0 0 auto 0;height:58px;display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;z-index:20;background:linear-gradient(#151823,#0c0e15);border-bottom:2px solid var(--mg)}
+.tb{display:flex;align-items:center;gap:10px;padding:0 14px}
+.tb.mid{min-width:0;overflow:hidden;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.lbl{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cy);display:block;font-family:var(--hfont)}
+.val{font-family:var(--hfont);font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.lamp{font-family:var(--hfont);font-weight:700;font-size:14px;letter-spacing:2px;padding:4px 10px;border:2px solid #5a1d1d;color:#7a3a3a;border-radius:4px;background:#1a0b0b;transition:.3s}
+.lamp.on{background:var(--red);border-color:#ff8a8a;color:#fff;box-shadow:0 0 18px var(--red),0 0 40px rgba(255,46,46,.5)}
+.timer{font-family:var(--hfont);font-size:24px;font-variant-numeric:tabular-nums;color:var(--cy);cursor:pointer;user-select:none}
+.timer.warn{color:var(--org)}.timer.over{color:#ff8a8a}
+.tbtn{border:1.5px solid var(--line);background:transparent;border-radius:6px;padding:4px 10px;font-weight:700;font-size:16px}
+.tbtn:hover{border-color:var(--cy);color:var(--cy)}
+
+/* ===== Slides ===== */
+.deck{position:absolute;inset:64px 0 66px 0;z-index:1}
+.slide{position:absolute;inset:0;overflow:auto;padding:6px clamp(16px,3vw,44px) 10px;opacity:0;visibility:hidden;transform:scale(.985);transition:opacity .35s,transform .35s,visibility .35s}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.inner{max-width:1300px;margin:0 auto}
+/* lower-third title */
+.l3{display:flex;align-items:stretch;margin:0 0 10px;font-family:var(--hfont);font-weight:700;font-size:28px;line-height:1.15;max-width:100%}
+.l3 .k{background:var(--mg);color:#fff;padding:6px 14px;font-size:16px;letter-spacing:2px;display:flex;align-items:center;text-transform:uppercase;white-space:nowrap}
+.l3 .t{background:linear-gradient(90deg,#f3f5fa,#d9deea);color:#0b0c12;padding:6px 18px;clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);padding-right:34px}
+.sub{color:var(--muted);margin:-4px 0 10px;font-size:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;position:relative}
+.card h3{margin:0 0 8px;font-family:var(--hfont);font-size:22px;color:var(--cy)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:8px;padding:9px 16px;font-weight:700;background:var(--cy);color:#04232a;box-shadow:0 3px 0 var(--cy-d);transition:transform .1s,filter .15s}
+.btn:hover{filter:brightness(1.12)}.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--cy-d)}
+.btn.mg{background:var(--mg);color:#fff;box-shadow:0 3px 0 var(--mg-d)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost.on{border-color:var(--cy);color:var(--cy);background:var(--cy-soft)}
+.btn.red{background:var(--red);color:#fff;box-shadow:0 3px 0 #a31414}
+.btn.sm{padding:6px 12px;font-size:17px}
+.btn[disabled]{opacity:.4;cursor:default}
+.feedback{font-size:19px;font-weight:700;min-height:28px;margin-top:6px}
+.feedback.ok{color:var(--grn)}.feedback.no{color:#ff8a8a}
+/* camera frame corners */
+.cam{position:relative}
+.cam::after{content:"";position:absolute;inset:-7px;pointer-events:none;--c:var(--cy);
+  background:linear-gradient(var(--c),var(--c)) 0 0/28px 3px no-repeat,linear-gradient(var(--c),var(--c)) 0 0/3px 28px no-repeat,
+  linear-gradient(var(--c),var(--c)) 100% 0/28px 3px no-repeat,linear-gradient(var(--c),var(--c)) 100% 0/3px 28px no-repeat,
+  linear-gradient(var(--c),var(--c)) 0 100%/28px 3px no-repeat,linear-gradient(var(--c),var(--c)) 0 100%/3px 28px no-repeat,
+  linear-gradient(var(--c),var(--c)) 100% 100%/28px 3px no-repeat,linear-gradient(var(--c),var(--c)) 100% 100%/3px 28px no-repeat}
+.cam.mgc::after{--c:var(--mg)}
+.rec{display:inline-flex;align-items:center;gap:6px;font-family:var(--hfont);font-size:14px;letter-spacing:2px;color:#ff8a8a}
+.rec::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.2}}
+.part-o{--pc:var(--c1)}.part-r{--pc:var(--c2)}.part-f{--pc:var(--c3)}.part-c{--pc:var(--c4)}
+
+/* ===== Intro title card ===== */
+.intro{min-height:calc(100vh - 150px);display:flex;align-items:center;justify-content:center}
+.titlecard{width:min(1080px,100%);text-align:center;padding:30px 40px 0;background:radial-gradient(ellipse at 50% 0%,rgba(34,211,238,.18),transparent 65%),var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.show-logo{font-family:var(--hfont);font-weight:700;font-size:clamp(38px,5vw,62px);letter-spacing:3px;line-height:1;background:linear-gradient(90deg,var(--cy),#fff 45%,var(--mg));-webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0 4px}
+.show-sub{font-family:var(--hfont);letter-spacing:6px;color:var(--muted);font-size:16px}
+.ch-title{font-size:clamp(22px,2.4vw,30px);font-weight:600;margin:16px auto 18px;max-width:900px}
+.ch-title b{color:var(--gold)}
+.credits{display:grid;grid-template-columns:repeat(3,1fr);margin:0 -40px;border-top:1px solid var(--line)}
+.credits div{padding:14px 10px;font-size:21px;font-weight:600;border-right:1px solid var(--line)}
+.credits div:last-child{border-right:none}
+.credits small{display:block;font-family:var(--hfont);font-size:12px;letter-spacing:2px;color:var(--cy);text-transform:uppercase;font-weight:400}
+.rundown{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.rundown span{font-family:var(--hfont);font-size:16px;padding:4px 12px;border:1px solid var(--line);border-radius:20px;color:var(--muted)}
+.rundown span b{color:var(--mg)}
+
+/* ===== Teleprompter ===== */
+.tp{height:330px;overflow:hidden;position:relative;background:#000;border-radius:10px;border:1px solid var(--line)}
+.tp::before,.tp::after{content:"";position:absolute;left:0;right:0;height:70px;z-index:2;pointer-events:none}
+.tp::before{top:0;background:linear-gradient(#000,transparent)}
+.tp::after{bottom:0;background:linear-gradient(transparent,#000)}
+.tp .guide{position:absolute;left:0;right:0;top:120px;height:56px;border-top:1px dashed rgba(34,211,238,.35);border-bottom:1px dashed rgba(34,211,238,.35);z-index:1;pointer-events:none}
+.tp .guide::before{content:"▶";position:absolute;left:6px;top:12px;color:var(--cy);font-size:20px}
+.roll{position:absolute;left:0;right:0;top:0;padding:120px 46px 160px;font-size:32px;line-height:1.55;font-weight:500;will-change:transform}
+.roll span{transition:background .3s,color .3s;border-radius:4px}
+.roll.colored span[class^="part-"]{background:color-mix(in srgb,var(--pc) 22%,transparent);box-shadow:inset 0 -3px 0 var(--pc)}
+.tpctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.tpctrl input[type=range]{accent-color:var(--cy);width:130px}
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:16px}
+.legend i{font-style:normal;padding:2px 10px;border-radius:12px;border:1.5px solid var(--pc);color:var(--pc)}
+.qa .opt{display:block;width:100%;text-align:left;margin:6px 0;padding:8px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--panel2);font-size:18px}
+.qa .opt.ok{border-color:var(--grn);background:rgba(62,224,138,.14)}
+.qa .opt.no{border-color:#ff8a8a;background:rgba(255,46,46,.12)}
+.qa .q{font-weight:700;margin-top:6px}
+
+/* ===== Compare ===== */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.speech{font-size:20px;line-height:1.55;min-height:236px}
+.speech .tag{position:absolute;top:-13px;left:16px;font-family:var(--hfont);font-size:15px;letter-spacing:2px;padding:2px 12px;border-radius:4px;background:var(--panel2);border:1px solid var(--line)}
+.speech span{border-radius:4px;transition:.3s}
+.speech span.hl{background:color-mix(in srgb,var(--pc) 25%,transparent);box-shadow:inset 0 -3px 0 var(--pc)}
+.speech span.bad{background:rgba(255,46,46,.22);box-shadow:inset 0 -3px 0 var(--red)}
+.speech .num{font-style:normal;display:none;font-family:var(--hfont);font-size:14px;background:var(--pc);color:#000;border-radius:50%;width:22px;height:22px;align-items:center;justify-content:center;margin-right:4px;vertical-align:2px}
+.speech.shownum .num{display:inline-flex}
+.speech .wc{position:absolute;right:14px;bottom:8px;font-size:15px;color:var(--muted)}
+.speech.picked{border-color:var(--grn);box-shadow:0 0 0 2px var(--grn)}
+.quals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.qual{border:1.5px solid var(--line);background:var(--panel2);border-radius:10px;padding:8px 10px;text-align:left;font-size:18px;font-weight:700}
+.qual small{display:block;font-weight:400;font-size:15px;color:var(--muted)}
+.qual.on{border-color:var(--pc);box-shadow:0 0 0 2px var(--pc)}
+.qual.found::after{content:" ✓";color:var(--grn)}
+.why{margin-top:10px;font-size:19px;min-height:56px;padding:8px 14px;border-left:4px solid var(--mg);background:var(--mg-soft);border-radius:0 8px 8px 0}
+
+/* ===== Fact / opinion ===== */
+.sorter{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:16px;align-items:stretch}
+.bin{border:2px dashed var(--line);border-radius:12px;padding:10px 12px;background:var(--panel);display:flex;flex-direction:column;min-height:400px}
+.bin .bh{width:100%;border:none;border-radius:10px;padding:12px;font-family:var(--hfont);font-weight:700;font-size:24px;color:#04232a;background:var(--cy)}
+.bin.op .bh{background:var(--mg);color:#fff}
+.bin ul{list-style:none;margin:8px 0 0;padding:0;font-size:16px;overflow:auto;flex:1}
+.bin li{padding:4px 8px;border-radius:6px;margin:4px 0;background:var(--panel2)}
+.bin li.w{outline:1.5px solid #ff8a8a}
+.onstage{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.mic-card{font-size:28px;font-weight:600;padding:26px 24px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);width:100%;min-height:150px;display:flex;align-items:center;justify-content:center}
+.shake,.mic-card.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.score{font-family:var(--hfont);font-size:22px}
+.hint{font-size:17px;color:var(--muted)}
+.hint b.c{color:var(--cy)}.hint b.m{color:var(--mg)}
+
+/* ===== Structure ===== */
+.ladder{display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--panel);border-left:6px solid var(--pc)}
+.step .n{font-family:var(--hfont);font-size:30px;color:var(--pc);text-align:center}
+.step b{font-size:21px}.step div div{font-size:17px;color:var(--muted)}
+.slots{display:flex;flex-direction:column;gap:7px;margin:8px 0}
+.slot{min-height:46px;border:2px dashed var(--line);border-radius:8px;padding:6px 12px;font-size:18px;display:flex;align-items:center;gap:10px}
+.slot .sn{font-family:var(--hfont);color:var(--muted);min-width:110px;font-size:15px}
+.slot.full{border-style:solid;border-color:var(--pc);background:color-mix(in srgb,var(--pc) 12%,transparent)}
+.pool{display:flex;flex-direction:column;gap:7px}
+.chip{border:1.5px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 12px;font-size:18px;text-align:left}
+.chip:hover{border-color:var(--cy)}
+.chip.shake{animation:shake .4s;border-color:#ff8a8a}
+
+/* ===== Builder ===== */
+.topics{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bcards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bcard{background:var(--panel);border-radius:10px;border-top:4px solid var(--pc);padding:8px 10px}
+.bcard label{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:18px;color:var(--pc)}
+.bcard label button{font-size:14px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel2)}
+.bcard textarea{width:100%;height:82px;resize:none;background:#0a0b10;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:18px;line-height:1.35;outline:none}
+.bcard textarea:focus{border-color:var(--pc)}
+.preview{height:300px;overflow:auto;background:#000;border-radius:10px;padding:12px 16px;font-size:21px;line-height:1.5;border:1px solid var(--line)}
+.preview p{margin:0 0 8px;padding-left:10px;border-left:4px solid var(--pc)}
+.preview .empty{color:#555}
+.meter{height:16px;border-radius:8px;background:var(--panel2);overflow:hidden;margin:8px 0 4px;position:relative}
+.meter i{display:block;height:100%;width:0;background:var(--cy);transition:width .3s,background .3s}
+.meter::before,.meter::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:#fff6}
+.meter::before{left:25%}.meter::after{left:66.6%}
+.wcline{display:flex;justify-content:space-between;font-size:18px;font-weight:700}
+
+/* ===== ON AIR ===== */
+.studio{display:grid;grid-template-columns:1.45fr 1fr;gap:18px}
+.monitor{background:#000;border-radius:12px;border:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:10px;min-height:470px}
+.mtop{display:flex;justify-content:space-between;align-items:center}
+.bigLamp{font-family:var(--hfont);font-weight:700;font-size:28px;letter-spacing:4px;padding:6px 20px;border-radius:8px;border:3px solid #4a1a1a;color:#5e2a2a;background:#140808;transition:.3s}
+.bigLamp.on{background:var(--red);color:#fff;border-color:#ff9a9a;box-shadow:0 0 30px var(--red),0 0 70px rgba(255,46,46,.55)}
+.count{font-family:var(--hfont);font-size:84px;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
+.count.low{color:var(--org)}.count.done{color:var(--red);animation:blink .6s infinite}
+.pbar{height:10px;border-radius:5px;background:var(--panel2);overflow:hidden}.pbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--mg),var(--cy))}
+.cue{flex:1;border-radius:10px;padding:12px 16px;background:var(--panel);border-left:6px solid var(--pc);font-size:26px;font-weight:600;display:flex;flex-direction:column;justify-content:center}
+.cue small{font-family:var(--hfont);font-size:15px;letter-spacing:2px;color:var(--pc);font-weight:400}
+.namein{background:transparent;border:none;border-bottom:2px solid var(--mg);font-family:var(--hfont);font-size:22px;outline:none;width:220px;padding:2px 4px}
+.lowerthird{display:flex;align-items:stretch;font-family:var(--hfont)}
+.lowerthird .a{background:var(--mg);padding:4px 12px;font-size:14px;letter-spacing:2px;display:flex;align-items:center}
+.lowerthird .b{background:#f3f5fa;color:#000;padding:2px 12px}
+.rules li{margin:6px 0;font-size:19px}
+.rules{padding-left:4px;list-style:none;margin:0}
+.clap{font-size:26px;padding:12px;width:100%}
+.claps{font-family:var(--hfont);font-size:18px;color:var(--gold);text-align:center;min-height:26px}
+
+/* ===== Rubric ===== */
+.rub{list-style:none;margin:0;padding:0}
+.rub li{display:grid;grid-template-columns:1fr auto;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);gap:10px}
+.rub li b{font-size:20px}.rub li small{display:block;color:var(--muted);font-size:16px}
+.stars button{font-size:32px;border:none;background:none;filter:grayscale(1) brightness(.6);opacity:.55;padding:0 2px;transition:.15s}
+.stars button.on{filter:none;opacity:1;transform:scale(1.08)}
+.total{font-family:var(--hfont);font-size:54px;text-align:center;line-height:1}
+.verdict{text-align:center;font-size:22px;font-weight:700;min-height:32px}
+.board{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto;font-size:18px}
+.board li{display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid var(--line)}
+
+/* ===== Grammar ===== */
+.rulesL{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.rulesL .card{padding:10px 14px;font-size:18px}
+.rulesL .card b{color:var(--pc);font-size:19px}
+.gq{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gitem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.gitem .w{font-family:var(--hfont);font-size:26px;margin-bottom:6px}
+.gitem .w em{color:var(--gold);font-style:normal}
+.gitem button{margin:3px;min-width:96px}
+.gitem.ok{border-color:var(--grn)}.gitem.no{border-color:#ff8a8a}
+.gitem .r{font-size:15px;color:var(--muted);min-height:20px}
+
+/* ===== Reflection ===== */
+.frames .fr{display:flex;align-items:baseline;gap:8px;margin:10px 0;font-weight:700;font-size:20px;flex-wrap:wrap}
+.frames .fr div[contenteditable]{flex:1;min-width:220px;border-bottom:2px dashed var(--cy);outline:none;padding:2px 6px;font-weight:500;color:var(--cy)}
+.frames .fr div[contenteditable]:empty::before{content:attr(data-ph);color:#5b6378}
+.vu{display:flex;gap:8px;align-items:flex-end;height:110px;margin-top:6px}
+.vu button{flex:1;border:1px solid var(--line);border-radius:6px 6px 0 0;background:var(--panel2);font-family:var(--hfont);font-size:18px;color:var(--muted)}
+.vu button.on{background:linear-gradient(var(--mg),var(--cy));color:#000;border-color:transparent}
+.hw li{margin:6px 0;font-size:19px}
+.endc{font-family:var(--hfont);letter-spacing:3px;color:var(--muted);text-align:center;margin-top:8px;font-size:15px}
+
+/* ===== Nav / notes ===== */
+.nav{position:fixed;inset:auto 0 0 0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:20;gap:10px;background:linear-gradient(#0c0e15,#151823);border-top:2px solid var(--cy)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.dot{min-width:40px;height:30px;border:1.5px solid var(--line);border-radius:4px;background:transparent;color:var(--muted);font-family:var(--hfont);font-size:14px}
+.dot.on{background:var(--mg);color:#fff;border-color:var(--mg)}
+.dot.done{color:var(--cy);border-color:var(--cy-d)}
+.tnotes{position:fixed;right:16px;bottom:70px;width:min(460px,calc(100vw - 32px));max-height:calc(100vh - 150px);overflow:auto;background:#fffbe8;color:#2a2410;border:2px solid var(--gold);border-radius:8px;padding:12px 16px;font-size:16px;box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:25;display:none}
+.tnotes.show{display:block}
+.tnotes h4{margin:0 0 6px;font-size:17px}
+.tnotes ul{margin:0;padding-left:20px}.tnotes li{margin:3px 0}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+@media (max-height:900px){
+  body{font-size:18px}
+  .l3{font-size:24px;margin-bottom:8px}.l3 .k{font-size:14px}
+  .sub{font-size:17px;margin-bottom:6px}
+  .card{padding:10px 14px}
+  .card h3{font-size:20px;margin-bottom:6px}
+  .tp{height:290px}.roll{font-size:29px;padding-top:110px}.tp .guide{top:110px;height:50px}
+  .speech{font-size:18px;min-height:206px}
+  .qual{font-size:17px;padding:6px 8px}.qual small{font-size:14px}
+  .why{font-size:18px;min-height:50px}
+  .bin{min-height:350px}
+  .mic-card{font-size:25px;min-height:130px;padding:18px}
+  .step{padding:6px 10px}.step .n{font-size:26px}.step b{font-size:19px}.step div div{font-size:16px}
+  .slot{min-height:40px;font-size:17px;padding:4px 10px}.chip{font-size:17px;padding:5px 10px}
+  .bcard textarea{height:70px;font-size:18px}
+  .preview{height:250px;font-size:19px}
+  .monitor{min-height:420px;gap:8px}.count{font-size:70px}.cue{font-size:23px}
+  .rules li{font-size:18px;margin:4px 0}
+  .rub li{padding:4px 8px}.rub li b{font-size:19px}.rub li small{font-size:15px}.stars button{font-size:28px}
+  .total{font-size:44px}
+  .gitem .w{font-size:23px}.gitem{padding:8px}
+  .rulesL .card{font-size:17px;padding:8px 12px}
+  .frames .fr{margin:7px 0;font-size:19px}
+  .hw li{font-size:18px;margin:4px 0}
+  .vu{height:90px}
+  .titlecard{padding-top:20px}.ch-title{margin:10px auto 12px}
+}
+@media (max-width:1000px){
+  .grid2,.cmp,.sorter,.studio,.bcards,.rulesL{grid-template-columns:1fr !important}
+  .quals,.gq{grid-template-columns:1fr 1fr !important}
+  .dots,.tb.mid{display:none}
+  .top{grid-template-columns:1fr auto}
+  .credits{grid-template-columns:1fr}
+  .bin{min-height:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="tb"><span><span class="lbl">Хичээл</span><span class="val">📺 Монгол хэл · 5-р анги</span></span></div>
+  <div class="tb mid"><span style="min-width:0;width:100%"><span class="lbl">Илтгэгчийн академи · <span id="sheetNo">Хэсэг 1/10</span></span><span class="val" id="stageName"></span></span></div>
+  <div class="tb">
+    <span class="lamp" id="hdrLamp" title="ON AIR гэрэл">ON AIR</span>
+    <div class="timer" id="timer" title="Хичээлийн үлдсэн хугацаа (2 удаа дарвал 40:00 болно)">⏱ <span id="tval">40:00</span></div>
+    <button class="tbtn" id="tPlay" title="Цаг эхлүүлэх / зогсоох">▶</button>
+    <button class="tbtn" id="notesBtn" title="Багшийн тэмдэглэл (N)">📝</button>
+    <button class="tbtn" id="fsBtn" title="Бүтэн дэлгэц (F)">⛶</button>
+  </div>
+</header>
+
+<main class="deck">
+
+<!-- 1. INTRO -->
+<section class="slide" data-name="Нэвтрүүлгийн эхлэл" data-min="1"
+  data-notes="Хүүхдүүдтэй мэндэлж, «Өнөөдөр манай анги ТВ студи болж, бид бүгд илтгэгч болно» гэж танилцуулна.|Хичээлийн дараалал: загвар илтгэл сонсох → шинжлэх → баримт/бодол ялгах → бүтэц → илтгэл бүтээх → ON AIR бэлтгэл → үнэлгээ → хэлний булан → дүгнэлт.|Сурах бичиг «Монгол хэл V», 6-р бүлэг, х.69–80.|Дээд талын ▶ товчоор 40 минутын цагийг эхлүүлнэ (цаг дээр 2 дарвал 40:00 болно). ←/→ шилжих, F бүтэн дэлгэц, N тэмдэглэл.">
+  <div class="inner intro">
+    <div class="titlecard cam">
+      <div class="row" style="justify-content:space-between"><span class="rec">ШУУД</span><span class="lbl">6-р бүлэг · х.69–80</span></div>
+      <div class="show-sub">🎙️ 5-Р АНГИЙН ТВ СТУДИ</div>
+      <div class="show-logo">ИЛТГЭГЧИЙН АКАДЕМИ</div>
+      <div class="ch-title">Илтгэх үедээ <b>баримт</b> хэрэглэн үзэл бодлоо <b>товч, оновчтой</b> илэрхийлье</div>
+      <div class="rundown"><span><b>1</b> Загвар</span><span><b>2</b> Шинжилгээ</span><span><b>3</b> Бүтээх</span><span><b>4</b> Бэлтгэл</span><span><b>5</b> Үнэлгээ</span></div>
+      <div class="credits">
+        <div><small>Сургууль</small>🏫 1-р сургууль</div>
+        <div><small>Хичээл</small>📖 Монгол хэл</div>
+        <div><small>Хөтлөгч</small>👩‍🏫 Багш: В. Гэрэлтуяа</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. MODEL SPEECH -->
+<section class="slide" data-name="Шууд нэвтрүүлэг: загвар илтгэл" data-min="3"
+  data-notes="▶ дарж телепромптерыг эхлүүлнэ. Багш эсвэл сайн уншдаг сурагч «илтгэгч» болж чангаар уншина, бусад нь сонсоно. Хурдыг гулсуураар тохируулна.|Сонсохын өмнө 2 зорилго өгнө: «Илтгэгч юу гэж боддог вэ? Ямар баримт хэлсэн бэ?» — баруун талын асуултад хариулна.|Дараа нь «🎨 Хэсгүүдийг будах» дарж 4 хэсгийг өнгөөр харуулна (5-р хэсэгт энэ бүтцийг дэлгэрүүлнэ).|Илтгэл дэх баримт: Нарангийн багийн судалгаа — сурах бичиг х.76, дасгал 1.5. Зохиогчийн бичсэн жишээ илтгэл.|Цаг байвал: х.69–72 дахь Нарангийн «Шагайн наадгай», Батын «Зохиолч Д.Нацагдорж» илтгэлийг номоос уншуулж, «Ямар баримт, үзүүлэн ашигласан бэ?» (дасгал 3.2) гэж асууна.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">● Шууд</span><span class="t">Загвар илтгэл: «Өдөр бүр ном уншъя»</span></h2>
+    <div class="grid2" style="grid-template-columns:1.6fr 1fr">
+      <div>
+        <div class="tp cam" id="tpBox"><div class="guide"></div>
+          <div class="roll" id="tpRoll">
+            <span>Сайн байцгаана уу! Миний илтгэлийн сэдэв: «Өдөр бүр ном уншъя».</span>
+            <span class="part-o">Хүүхэд бүр өдөрт дор хаяж нэг цаг ном унших хэрэгтэй гэж би боддог.</span>
+            <span class="part-r">Учир нь ном уншихад үгийн сан баяжиж, бодох чадвар сайжирдаг.</span>
+            <span class="part-f">Жишээ нь, сурах бичигт гардаг Нарангийн багийн судалгаагаар таван хүүхэд нийлээд өдөрт ердөө гурван цаг ном уншдаг юм байна. Энэ нь нэг хүүхдэд ойролцоогоор 36 минут ногдож байна.</span>
+            <span class="part-f">Би өөрөө унтахын өмнө 20 минут уншдаг болсноос хойш зохион бичлэг минь сайжирсан.</span>
+            <span class="part-c">Тиймээс өдөрт нэг цагийг номд зориулъя: 30 минут уншиж, 10 минут бодож, 20 минут тэмдэглэе.</span>
+            <span>Анхаарал хандуулсанд баярлалаа!</span>
+          </div>
+        </div>
+        <div class="tpctrl">
+          <button class="btn mg" id="tpPlay">▶ Эхлүүлэх</button>
+          <button class="btn ghost sm" id="tpBack">⏮ Эхнээс</button>
+          <label class="hint">🐢 <input type="range" id="tpSpd" min="1" max="6" value="3"> 🐇</label>
+          <button class="btn ghost sm" id="tpColor">🎨 Хэсгүүдийг будах</button>
+        </div>
+        <div class="legend" id="tpLegend" style="margin-top:8px;visibility:hidden"><i class="part-o">💡 Үзэл бодол</i><i class="part-r">❓ Шалтгаан</i><i class="part-f">📊 Баримт, жишээ</i><i class="part-c">🎯 Дүгнэлт</i></div>
+      </div>
+      <div class="card qa">
+        <h3>👂 Сонсогчийн асуулт</h3>
+        <div class="q">1. Илтгэгч юу гэж боддог вэ?</div>
+        <div data-qa="1">
+          <button class="opt">а) Ном унших нь уйтгартай</button>
+          <button class="opt" data-ok>б) Өдөрт нэг цаг ном унших хэрэгтэй</button>
+          <button class="opt">в) Зөвхөн сургууль дээр уншина</button>
+        </div>
+        <div class="q">2. Илтгэгч ямар баримт хэлсэн бэ?</div>
+        <div data-qa="2">
+          <button class="opt" data-ok>а) Таван хүүхэд өдөрт 3 цаг уншдаг</button>
+          <button class="opt">б) Ном бол хамгийн гоё зүйл</button>
+          <button class="opt">в) Номын дэлгүүр хаалттай</button>
+        </div>
+        <div class="feedback" id="qaFb"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. ANALYSE -->
+<section class="slide" data-name="Шинжлэх: сул ба сайн илтгэл" data-min="4"
+  data-notes="Сэдэв «Монгол гутал» — сурах бичиг х.73, дасгал 2.1-ээс санаа авсан (хүүхдүүдийн ярианд: зураг, биет зүйл үзүүлэх, төрлийг тайлбарлах). Хоёр хувилбарыг зохиогч бичсэн.|Эхлээд хоёр сурагчаар 2 хувилбарыг чангаар уншуулна. «Аль нь илүү итгэл төрүүлэв?» — хувилбар дээр дарж санал өгнө.|Дараа нь 4 товчийг нэг нэгээр дарж «Яагаад?» гэж ярилцана. Сайн илтгэлд тодруулга, сул илтгэлд улаан тэмдэг гарна. 4-үүлээ олдвол баяр.|х.74, дасгал 1: «Бидэн рүү харахгүй, сул дуутай» гэх мэт илтгэгчийн алдааг мөн дурдаж болно.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Шинжилгээ</span><span class="t">Аль илтгэл илүү итгэл төрүүлэв?</span></h2>
+    <p class="sub">Сэдэв: «Монгол гутал» (х.73). 1) Хувилбар дээр дарж санал өгөөрэй. 2) Доорх 4 товчоор шалтгааныг олоорой.</p>
+    <div class="cmp">
+      <div class="card speech" id="spA" data-pick="A"><span class="tag">ХУВИЛБАР 1</span>
+        <span class="f">Аан...</span> монгол гутал. Монгол гутал их гоё шүү дээ. <span class="f">Тэгээд...</span> манай эмээ бас өмсдөг. <span class="f">Өө,</span> хоншоор нь дээшээ эргэчихсэн байдаг. <span class="f">Тэгээд</span> бас нэг иймэрхүү хээтэй. <span class="f">Аан,</span> өвөл бас дулаан байх. <span class="end">Тэгээд л болоо.</span>
+        <span class="wc" id="wcA"></span></div>
+      <div class="card speech" id="spB" data-pick="B"><span class="tag">ХУВИЛБАР 2</span>
+        <span class="part-o"><i class="num">1</i>Монгол гутал бол өнөөдөр ч хэрэгтэй, ухаалаг бүтээл гэж би боддог.</span>
+        <span class="part-r"><i class="num">2</i>Учир нь түүнийг малчин монголчуудын амьдралд тохируулан хийсэн.</span>
+        <span class="part-f"><i class="num">3</i>Жишээ нь, хоншоор нь дээш эргэсэн тул дөрөөнд хөлөө хийхэд амар. Ул нь зузаан, түрий нь өндөр учраас хөлийг хүйтнээс хамгаалдаг.</span>
+        <span class="part-c"><i class="num">4</i>Тиймээс баяр ёслолоор монгол гутлаа өмсөж, үндэсний өвөө хадгалъя.</span>
+        <span class="wc" id="wcB"></span></div>
+    </div>
+    <div class="quals">
+      <button class="qual part-f" data-q="f">📊 Баримт<small>шалгаж болох жишээ</small></button>
+      <button class="qual part-r" data-q="t">✂️ Товч<small>илүү үггүй</small></button>
+      <button class="qual part-o" data-q="d">🔢 Дараалал<small>эхлэл → гол → төгсгөл</small></button>
+      <button class="qual part-c" data-q="c">🎯 Дүгнэлт<small>санааг нэгтгэсэн</small></button>
+    </div>
+    <div class="why" id="why">👆 Эхлээд аль хувилбар илүү сайн болохыг сонгоорой.</div>
+  </div>
+</section>
+
+<!-- 4. FACT vs OPINION -->
+<section class="slide" data-name="Баримт уу, бодол уу?" data-min="5"
+  data-notes="Өгүүлбэрийг чангаар уншуулаад анги бүхлээрээ «Баримт!» эсвэл «Бодол!» гэж хашгирна, дараа нь сурагч хайрцаг дээр дарна.|Баримт — шалгаж болох зүйл (тоо, он, нэр). Үзэл бодол — хүний санаа, сэтгэгдэл («гоё», «хамгийн», «гэж боддог»).|Баримтуудыг сурах бичгээс авсан: Д.Нацагдорж 1906 онд төрсөн (х.71), алаг мэлхий 92/108 шагай (х.70), Ж.Гүррагчаа (х.73).|Х.74-ийн үнэлгээний 1-р шалгуур: «Үнэн бодит зүйл дээр тулгуурлан илтгэсэн эсэх» — иймээс баримтыг ялгаж сурах чухал гэж холбоно.|Буруу хариулт улаан хүрээтэй үлдэнэ — түүн дээр эргэн ярилцана. «↺» дахин эхлүүлнэ.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Тоглоом</span><span class="t">Баримт уу, үзэл бодол уу?</span></h2>
+    <div class="sorter">
+      <div class="bin fa"><button class="bh" id="toFact">📊 БАРИМТ</button><ul id="binF"></ul></div>
+      <div class="onstage">
+        <div class="score">Оноо: <span id="foScore">0</span> / <span id="foTotal">10</span></div>
+        <div class="mic-card cam mgc" id="foCard">🎙️</div>
+        <div class="feedback" id="foFb" style="min-height:56px"></div>
+        <div class="hint">📊 <b class="c">Баримт</b> = шалгаж болно: тоо, он, нэр, газар<br>💭 <b class="m">Бодол</b> = хүний санаа: гоё, хамгийн, гэж боддог</div>
+        <button class="btn ghost sm" id="foReset">↺ Дахин</button>
+      </div>
+      <div class="bin op"><button class="bh" id="toOp">💭 ҮЗЭЛ БОДОЛ</button><ul id="binO"></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. STRUCTURE -->
+<section class="slide" data-name="Илтгэлийн бүтэц: 4 алхам" data-min="4"
+  data-notes="Зүүн талын 4 алхмыг тайлбарлана. Сурах бичиг х.73–74 (дасгал 3.3, 4.3): илтгэлийн эхлэл, гол, төгсгөлд юу бичихээ төлөвлө — эхлэл = үзэл бодол, гол = шалтгаан + баримт, төгсгөл = дүгнэлт.|Баруун талд өгүүлбэрүүд холилдсон. Сурагчид дараалал ёсоор нь (1→4) дарна. Буруу бол чичирнэ.|3 үе: «Морин хуур» (х.80 гэрийн даалгаврын сэдэв), «Ж.Гүррагчаа» (х.73), «Өглөөний цай» (хүүхдийн амьдрал).|Холбох үгсийг онцлох: «гэж би боддог», «Учир нь», «Жишээ нь», «Тиймээс».">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Бүтэц</span><span class="t">Сайн илтгэлийн 4 алхам</span></h2>
+    <div class="grid2" style="grid-template-columns:1fr 1.25fr">
+      <div class="ladder">
+        <div class="step part-o"><span class="n">1</span><div><b>💡 Үзэл бодол</b><div>«... гэж би боддог.» — эхлэл</div></div></div>
+        <div class="step part-r"><span class="n">2</span><div><b>❓ Шалтгаан</b><div>«Учир нь ...» — яагаад?</div></div></div>
+        <div class="step part-f"><span class="n">3</span><div><b>📊 Баримт, жишээ</b><div>«Жишээ нь ...» — тоо, он, үйл явдал</div></div></div>
+        <div class="step part-c"><span class="n">4</span><div><b>🎯 Дүгнэлт</b><div>«Тиймээс ...» — төгсгөл</div></div></div>
+        <div class="hint" style="margin-top:4px">Эхлэл → Гол хэсэг → Төгсгөл (х.73)</div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">🧩 Дарааллыг сэргээ: <span id="pzTopic"></span></h3><span class="hint" id="pzRound"></span></div>
+        <div class="slots" id="pzSlots"></div>
+        <div class="pool" id="pzPool"></div>
+        <div class="row" style="justify-content:space-between;margin-top:4px"><div class="feedback" id="pzFb" style="margin:0"></div><button class="btn sm" id="pzNext" disabled>Дараагийн ▶</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. BUILDER -->
+<section class="slide" data-name="Илтгэл бүтээгч" data-min="7"
+  data-notes="Сурагчид хосоороо ажиллана. Сэдвээ сонгоно — сэдвүүд сурах бичиг х.73-ын хүснэгт (Эд зүйл: дээл, морин хуур, ааруул, монгол гутал, гэр...; Хүн: Ж.Гүррагчаа, О.Гүндэгмаа...) болон хүүхдийн амьдралаас.|4 картыг нөхнө. «✨» товч эхлэх үг (гэж би боддог / Учир нь / Жишээ нь / Тиймээс) нэмнэ. Хүүхдүүд дэвтэртээ бичээд, нэг хосынхыг дэлгэцэнд бичиж болно.|Баруун талд телепромптер урьдчилж харуулна. Үгийн тоолуур: 25-аас доош — богино, 25–80 — товч, оновчтой ✅, 80-аас дээш — урт.|Бичсэн нь энэ компьютерт автоматаар хадгалагдана, ON AIR хэсэгт сануулах карт болж гарна.|Х.74, дасгал 2: илтгэлийн агуулгыг илэрхийлэх зураг, үзүүлэн бэлдэхийг сануулна.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Бүтээх</span><span class="t">Илтгэл бүтээгч</span></h2>
+    <div class="topics" id="topics"></div>
+    <div class="grid2" style="grid-template-columns:1.35fr 1fr;gap:14px">
+      <div class="bcards" id="bcards"></div>
+      <div>
+        <div class="preview cam" id="preview"></div>
+        <div class="meter"><i id="wcBar"></i></div>
+        <div class="wcline"><span>📝 <span id="wcNum">0</span> үг</span><span id="wcMsg">Товч уу?</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. ON AIR -->
+<section class="slide" data-name="Бэлтгэл: ON AIR" data-min="7"
+  data-notes="2–3 хос ангийн өмнө гарч илтгэнэ. Нэрээ бичээд хугацаагаа (30/60/90 сек) сонгоно, ▶ дарахад ON AIR гэрэл асна.|Сануулах карт илтгэл бүтээгчээс автоматаар ирнэ, хугацааны 4 хэсэгт солигдоно. ◀ ▶-оор гараар сольж болно.|Сурах бичиг х.74 «Илтгэл тавихад анхаарах зүйл»-ийг баруун талд товчлон харуулсан — номоос уншуулж болно.|Илтгэл дуусахад 👏 дарж алга ташина. Сонсогчид нэг асуулт асууж, сайн талыг магтана (х.74).|Дараа нь шууд «Үнэлгээ» хэсэгт шилжиж оноо өгнө.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Бэлтгэл</span><span class="t">Студид: ON AIR</span></h2>
+    <div class="studio">
+      <div class="monitor cam">
+        <div class="mtop">
+          <div class="lowerthird"><span class="a">ИЛТГЭГЧ</span><span class="b"><input class="namein" id="spName" placeholder="Нэрээ бичээрэй"></span></div>
+          <div class="bigLamp" id="bigLamp">ON AIR</div>
+        </div>
+        <div class="count" id="oaCount">1:00</div>
+        <div class="pbar"><i id="oaBar"></i></div>
+        <div class="cue" id="cue"></div>
+        <div class="row" style="justify-content:space-between">
+          <div class="row"><button class="btn ghost sm" data-dur="30">30 сек</button><button class="btn ghost sm on" data-dur="60">60 сек</button><button class="btn ghost sm" data-dur="90">90 сек</button></div>
+          <div class="row"><button class="btn ghost sm" id="cuePrev">◀</button><button class="btn ghost sm" id="cueNext">▶</button><button class="btn red" id="oaGo">● Эхлэх</button><button class="btn ghost sm" id="oaReset">↺</button></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card"><h3>🎬 Илтгэгчийн дүрэм (х.74)</h3>
+          <ul class="rules">
+            <li>👀 Сонсогч руугаа харж ярь</li>
+            <li>🔊 Тод, чанга, түгдрэлгүй ярь</li>
+            <li>📖 Номноос уншиж байгаа юм шиг бүү ярь</li>
+            <li>🖼️ Зураг, үзүүлэн ашиглаж тайлбарла</li>
+            <li>🙋 Сонсогч: асуулт асууж, сайн талыг магт</li>
+          </ul></div>
+        <button class="btn mg clap" id="clap">👏 Алга ташилт!</button>
+        <div class="claps" id="clapTxt"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. FEEDBACK -->
+<section class="slide" data-name="Үнэлгээ: студийн шүүгчид" data-min="4"
+  data-notes="Илтгэл бүрийн дараа анги хамтдаа од өгнө (1–3 од). Шалгуурыг сурах бичиг х.74-ийн үнэлгээний хүснэгтээс (үнэн бодит зүйлд тулгуурласан, дуу хоолой, дохио зангаа...) товчилсон.|«💾 Хадгалах» дарахад илтгэгчийн нэр, оноо самбарт нэмэгдэнэ (энэ компьютерт хадгалагдана).|«2 од + 1 хүсэл»: хоёр сайн тал, нэг сайжруулах санал хэлүүлнэ (х.74, дасгал 3–4: өөрийн илтгэлийг бусдынхтай харьцуулж засах зүйлээ олох).">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Үнэлгээ</span><span class="t">Студийн шүүгчид</span></h2>
+    <div class="grid2" style="grid-template-columns:1.5fr 1fr">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h3 style="margin:0">⭐ Илтгэгч: <span id="rubName">—</span></h3><button class="btn ghost sm" id="rubClr">↺ Шинэ илтгэгч</button></div>
+        <ul class="rub" id="rub"></ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card"><div class="total"><span id="rubTot">0</span><span style="font-size:.5em;color:var(--muted)"> / 15</span></div><div class="verdict" id="rubVer"></div>
+          <div class="row" style="justify-content:center;margin-top:6px"><button class="btn mg sm" id="rubSave">💾 Хадгалах</button></div></div>
+        <div class="card"><h3>🏆 Өнөөдрийн илтгэгчид</h3><ul class="board" id="board"></ul></div>
+        <div class="hint">💬 <b>2 од + 1 хүсэл:</b> хоёр сайн тал, нэг санал хэлье.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. GRAMMAR -->
+<section class="slide" data-name="Реклам завсарлага: хэлний булан" data-min="3"
+  data-notes="Сурах бичиг х.77–79: үйл үг бүтээх «л» залгавар. 3 дүрмийг товч тайлбарлана (жишээ үгс номын дасгалаас: дуу, хүрээ — х.77; бүлэг, ир — х.78; лааз, цоож — х.79; эцэс — х.79 дасгал 3, дүрмээс зөрдөг).|Анги хамтдаа үг бүрийн зөв хэлбэрийг сонгоно, сурагч гарч дарна.|Цаг хүрэхгүй бол энэ хэсгийг гэрийн даалгавартай (х.80, дасгал 3) холбож болно.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">📢 Реклам</span><span class="t">Хэлний булан: үйл үг бүтээх «л» залгавар</span></h2>
+    <div class="rulesL">
+      <div class="card part-f"><b>1. Эгшгээр төгссөн</b><br>шууд + л<br>дуу → <u>дуул</u> (х.77)</div>
+      <div class="card part-o"><b>2. Эгшигт гийгүүлэгчээр</b><br>+ л, эгшгийг <u>ард</u> нь<br>бүлэг → <u>бүлэглэ</u> (х.78)</div>
+      <div class="card part-c"><b>3. Заримдаг гийгүүлэгчээр</b><br>эгшгийг <u>өмнө</u> нь<br>лааз → <u>лаазал</u> (х.79)</div>
+    </div>
+    <div class="gq" id="gq"></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px"><div class="score">✅ <span id="gScore">0</span> / <span id="gTot">8</span></div><button class="btn ghost sm" id="gReset">↺ Дахин</button></div>
+  </div>
+</section>
+
+<!-- 10. REFLECTION -->
+<section class="slide" data-name="Нэвтрүүлгийн төгсгөл" data-min="2"
+  data-notes="2–3 сурагчаар өгүүлбэрийг гүйцээж хэлүүлнэ; дэлгэцэнд бичвэл хадгалагдана.|«Итгэлийн хэмжүүр»: «Ангийн өмнө илтгэл тавихдаа хэр итгэлтэй байна?» — гар өргөүлж, дийлэнхийн түвшинг дарна.|Гэрийн даалгавар: х.80, дасгал 1 (Морин хуур эсвэл Д.Сүхбаатар — илтгэлийн төлөвлөгөө, 4 алхмаар), дасгал 3 («л» залгавар нөхөх). Сонголтоор: х.72 — «Миний нутаг» шүлэг цээжлэх.">
+  <div class="inner">
+    <h2 class="l3"><span class="k">Төгсгөл</span><span class="t">Өнөөдрийн нэвтрүүлэг дууслаа</span></h2>
+    <div class="grid2">
+      <div class="card frames"><h3>🎙️ Миний бодол</h3>
+        <div class="fr">Өнөөдөр би <div contenteditable="true" data-k="il_r1" data-ph="... сурлаа"></div></div>
+        <div class="fr">Баримт гэдэг нь <div contenteditable="true" data-k="il_r2" data-ph="..."></div></div>
+        <div class="fr">Дараагийн илтгэлдээ би <div contenteditable="true" data-k="il_r3" data-ph="... -г сайжруулна"></div></div>
+        <div style="margin-top:8px;font-weight:700">📶 Итгэлийн хэмжүүр: илтгэл тавихдаа хэр итгэлтэй байна?</div>
+        <div class="vu" id="vu"></div>
+        <div class="feedback" id="vuFb" style="font-size:18px"></div>
+      </div>
+      <div class="card"><h3>📚 Гэрийн даалгавар</h3>
+        <ul class="hw">
+          <li>📝 <b>х.80, дасгал 1:</b> «Морин хуур» эсвэл «Д.Сүхбаатар» сэдвээр илтгэлийн төлөвлөгөө бич — 4 алхмаар: 💡 → ❓ → 📊 → 🎯</li>
+          <li>✍️ <b>х.80, дасгал 3:</b> эхийн хоосон зайд «л» залгаврыг нөхөж бич.</li>
+          <li>⭐ <b>Сонголтоор (х.72):</b> «Миний нутаг» шүлгийг уншиж цээжил.</li>
+          <li>🖼️ Илтгэлдээ нэг зураг эсвэл биет үзүүлэн бэлдээрэй.</li>
+        </ul>
+        <button class="btn mg" id="finale" style="margin-top:8px">🎬 Нэвтрүүлгийг хаах</button>
+        <div class="endc">ИЛТГЭГЧИЙН АКАДЕМИ · 1-Р СУРГУУЛЬ · 5-Р АНГИ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="nav">
+  <button class="btn ghost" id="prevBtn">◀ Өмнөх</button>
+  <div class="dots" id="dots"></div>
+  <button class="btn" id="nextBtn">Дараах ▶</button>
+</nav>
+<div class="tnotes" id="tnotes"><h4>📝 Багшид зориулсан зөвлөмж</h4><ul id="tnList"></ul></div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ---------- Helpers ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const words=s=>(s.trim().match(/[^\s.,!?;:«»"—–-]+/g)||[]).length;
+let AC=null;function ac(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function beep(f=880,d=.15,v=.15,type='sine'){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d)}
+function good(){beep(660,.12);setTimeout(()=>beep(990,.18),110)}
+function bad(){beep(200,.25,.12,'square')}
+
+/* ---------- Slides ---------- */
+const slides=[...document.querySelectorAll('.slide')];const dots=$('dots');let cur=0;
+slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot';b.textContent=String(i+1).padStart(2,'0');b.title=s.dataset.name;b.onclick=()=>go(i);dots.appendChild(b)});
+function go(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
+  [...dots.children].forEach((d,j)=>{d.classList.toggle('on',j===cur);d.classList.toggle('done',j<cur)});
+  const s=slides[cur];
+  $('stageName').textContent=s.dataset.name;$('sheetNo').textContent='Хэсэг '+(cur+1)+'/'+slides.length;
+  $('tnList').innerHTML='<li>⏱ Зөвлөмж хугацаа: ≈'+s.dataset.min+' мин</li>'+s.dataset.notes.split('|').map(t=>'<li>'+t+'</li>').join('');
+  $('prevBtn').disabled=cur===0;$('nextBtn').textContent=cur===slides.length-1?'🏁 Төгсгөл':'Дараах ▶';
+  if(!s.contains($('tpBox')))tpPause();
+  if(s.contains($('cue'))){oaCueIdx=0;drawCue()}
+  if(s.contains($('rub')))$('rubName').textContent=$('spName').value.trim()||'—';
+}
+$('prevBtn').onclick=()=>go(cur-1);$('nextBtn').onclick=()=>{if(cur===slides.length-1)confetti(120);go(cur+1)};
+document.addEventListener('keydown',e=>{
+  if(e.target.isContentEditable||['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+  if(e.key==='ArrowRight'||e.key==='PageDown')go(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1);
+  else if(e.key==='f'||e.key==='F')toggleFS();
+  else if(e.key==='n'||e.key==='N')toggleNotes();
+});
+function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
+function toggleNotes(){$('tnotes').classList.toggle('show')}
+$('fsBtn').onclick=toggleFS;$('notesBtn').onclick=toggleNotes;
+
+/* ---------- Lesson timer ---------- */
+let remain=40*60,running=false,tick=null;
+function drawT(){const a=Math.abs(remain),m=Math.floor(a/60),s=a%60;$('tval').textContent=(remain<0?'+':'')+m+':'+String(s).padStart(2,'0');$('timer').className='timer'+(remain<0?' over':remain<=300?' warn':'')}
+$('tPlay').onclick=()=>{running=!running;$('tPlay').textContent=running?'⏸':'▶';if(running)tick=setInterval(()=>{remain--;drawT()},1000);else clearInterval(tick)};
+$('timer').ondblclick=()=>{remain=40*60;drawT()};drawT();
+
+/* ---------- Editable frames ---------- */
+document.querySelectorAll('[data-k]').forEach(e=>{const k=e.dataset.k;e.textContent=store.get(k)||'';e.addEventListener('input',()=>store.set(k,e.innerText))});
+
+/* ================= 2. Teleprompter ================= */
+const tpBox=$('tpBox'),tpRoll=$('tpRoll');let tpY=0,tpOn=false,tpLast=0;
+function tpStep(t){if(!tpOn)return;const dt=Math.min(.1,(t-tpLast)/1000);tpLast=t;tpY-=(8+(+$('tpSpd').value)*7)*dt;
+  const max=tpRoll.scrollHeight-tpBox.clientHeight*.55;if(-tpY>=max){tpY=-max;tpPause();$('tpPlay').textContent='✅ Дууслаа'}
+  tpRoll.style.transform=`translateY(${tpY}px)`;if(tpOn)requestAnimationFrame(tpStep)}
+function tpPause(){tpOn=false;$('tpPlay').textContent='▶ Үргэлжлүүлэх';$('hdrLamp').classList.toggle('on',oaRun)}
+$('tpPlay').onclick=()=>{if(tpOn){tpPause();return}tpOn=true;$('tpPlay').textContent='⏸ Түр зогсоох';$('hdrLamp').classList.add('on');tpLast=performance.now();requestAnimationFrame(tpStep)};
+$('tpBack').onclick=()=>{tpY=0;tpRoll.style.transform='translateY(0)';tpPause();$('tpPlay').textContent='▶ Эхлүүлэх'};
+$('tpColor').onclick=()=>{const on=tpRoll.classList.toggle('colored');$('tpColor').classList.toggle('on',on);$('tpLegend').style.visibility=on?'visible':'hidden'};
+document.querySelectorAll('[data-qa]').forEach(g=>{g.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+  if(b.hasAttribute('data-ok')){g.querySelectorAll('.opt').forEach(x=>x.classList.remove('no'));b.classList.add('ok');good();
+    const done=document.querySelectorAll('[data-qa] .opt.ok').length;$('qaFb').className='feedback ok';$('qaFb').textContent=done===2?'🎉 Сайн сонссон байна! Бодол + баримт хоёулаа олдлоо.':'👍 Зөв!';if(done===2)confetti(60)}
+  else{b.classList.add('no');bad();$('qaFb').className='feedback no';$('qaFb').textContent=g.dataset.qa==='2'?'🤔 Энэ бол баримт биш. Тоо хэлсэн хэсгийг санаарай.':'🤔 Илтгэгчийн эхний санааг дахин сонсоорой.'}})});
+
+/* ================= 3. Compare ================= */
+const spA=$('spA'),spB=$('spB');let picked=false;const foundQ=new Set();
+$('wcA').textContent=words(spA.innerText.replace(/ХУВИЛБАР 1/,''))+' үг';$('wcB').textContent=words(spB.innerText.replace(/ХУВИЛБАР 2|\d/g,''))+' үг';
+[spA,spB].forEach(sp=>sp.onclick=()=>{if(picked)return;
+  if(sp===spB){picked=true;spB.classList.add('picked');good();$('why').innerHTML='✅ Зөв! <b>Хувилбар 2</b> илүү итгэл төрүүлж байна. Одоо яагаад гэдгийг доорх 4 товчоор олоорой.'}
+  else{bad();sp.classList.add('shake');setTimeout(()=>sp.classList.remove('shake'),400);$('why').innerHTML='🤔 Дахин бодоорой: аль нь <b>баримт</b> хэлж, <b>дүгнэлт</b> хийсэн бэ?'}});
+const QWHY={
+  f:'📊 <b>Баримт:</b> Хувилбар 2 «хоншоор нь дээш эргэсэн тул дөрөөнд амар», «ул нь зузаан» гэж шалгаж болох жишээ хэлсэн. Хувилбар 1 зөвхөн «гоё», «дулаан байх» гэсэн.',
+  t:'✂️ <b>Товч:</b> Хувилбар 1-д «аан, тэгээд, өө» гэх мэт илүү үг олон (улаан). Хувилбар 2-ын өгүүлбэр бүр нэг санаатай.',
+  d:'🔢 <b>Дараалал:</b> Хувилбар 2: үзэл бодол → шалтгаан → баримт → дүгнэлт. Хувилбар 1-ийн санаа нааш цааш үсэрч байна.',
+  c:'🎯 <b>Дүгнэлт:</b> Хувилбар 2 «Тиймээс ...» гэж санаагаа нэгтгэж, сонсогчдод уриалсан. Хувилбар 1 «Тэгээд л болоо» гээд дуусчихлаа.'};
+document.querySelectorAll('.qual').forEach(b=>b.onclick=()=>{
+  if(!picked){$('why').innerHTML='👆 Эхлээд аль хувилбар илүү сайн болохыг сонгоорой.';return}
+  const q=b.dataset.q;document.querySelectorAll('.qual').forEach(x=>x.classList.toggle('on',x===b));
+  spA.querySelectorAll('span').forEach(s=>s.classList.remove('bad'));spB.querySelectorAll('span').forEach(s=>s.classList.remove('hl'));spB.classList.remove('shownum');
+  if(q==='f')spB.querySelectorAll('.part-f').forEach(s=>s.classList.add('hl'));
+  if(q==='t')spA.querySelectorAll('.f').forEach(s=>s.classList.add('bad'));
+  if(q==='d'){spB.classList.add('shownum');spB.querySelectorAll('[class^="part-"]').forEach(s=>s.classList.add('hl'))}
+  if(q==='c'){spB.querySelectorAll('.part-c').forEach(s=>s.classList.add('hl'));spA.querySelector('.end').classList.add('bad')}
+  $('why').innerHTML=QWHY[q];b.classList.add('found');
+  if(!foundQ.has(q)){foundQ.add(q);good();if(foundQ.size===4){confetti(90);$('why').innerHTML+=' <br>🏆 <b>4 нууцыг бүгдийг нь оллоо!</b>'}}});
+
+/* ================= 4. Fact or opinion ================= */
+const FO=[
+  {t:'Д.Нацагдорж 1906 онд төрсөн.',a:'f',e:'Он байна — номоос шалгаж болно (х.71).'},
+  {t:'Морин хуурын ая хамгийн сайхан.',a:'o',e:'«Хамгийн сайхан» — хүний сэтгэгдэл.'},
+  {t:'Алаг мэлхийг 92 эсвэл 108 шагайгаар өрдөг.',a:'f',e:'Тоо байна — шалгаж болно (х.70).'},
+  {t:'Шагайн тоглоом бол хамгийн хөгжилтэй тоглоом.',a:'o',e:'Өөр хүнд өөр тоглоом хөгжилтэй санагдана.'},
+  {t:'Ж.Гүррагчаа 1981 онд сансарт ниссэн.',a:'f',e:'Он, нэр, үйл явдал — баримт.'},
+  {t:'Монгол гутал их гоё харагддаг.',a:'o',e:'«Гоё» гэдгийг хүн бүр өөрөөр боддог.'},
+  {t:'Нэг цаг 60 минуттай.',a:'f',e:'Хэн шалгасан ч адилхан гарна.'},
+  {t:'Өвөл бол жилийн хамгийн сайхан улирал.',a:'o',e:'Зарим хүн зундаа илүү дуртай.'},
+  {t:'Монгол Улсын нийслэл бол Улаанбаатар хот.',a:'f',e:'Газрын зураг, номоос шалгаж болно.'},
+  {t:'Илтгэл тавих нь их сонирхолтой гэж би боддог.',a:'o',e:'«гэж би боддог» — бодлын тэмдэг.'}];
+let foDeck=[],foI=0,foSc=0,foLock=false;
+function foStart(){foDeck=shuffle(FO);foI=0;foSc=0;foLock=false;$('binF').innerHTML='';$('binO').innerHTML='';$('foScore').textContent=0;$('foTotal').textContent=FO.length;$('foFb').textContent='';foShow()}
+function foShow(){const c=$('foCard');if(foI>=foDeck.length){c.innerHTML='🏁 Бүгдийг ангиллаа!';$('foFb').className='feedback ok';$('foFb').textContent=foSc>=8?'🏆 Гайхалтай! '+foSc+' зөв.':'👍 '+foSc+' зөв. Улаан хүрээтэйг дахин ярилцъя.';if(foSc>=8)confetti(100);return}
+  c.textContent='«'+foDeck[foI].t+'»'}
+function foAns(a){if(foLock||foI>=foDeck.length)return;const it=foDeck[foI],ok=it.a===a;const li=document.createElement('li');li.textContent=it.t;
+  if(!ok)li.classList.add('w');$(a==='f'?'binF':'binO').appendChild(li);
+  $('foFb').className='feedback '+(ok?'ok':'no');$('foFb').innerHTML=(ok?'✅ Зөв! ':'❌ Үгүй — энэ бол '+(it.a==='f'?'БАРИМТ':'ҮЗЭЛ БОДОЛ')+'. ')+it.e;
+  if(ok){foSc++;good()}else{bad();$('foCard').classList.add('shake');setTimeout(()=>$('foCard').classList.remove('shake'),400)}
+  $('foScore').textContent=foSc;foI++;foLock=true;setTimeout(()=>{foLock=false;foShow()},ok?900:1700)}
+$('toFact').onclick=()=>foAns('f');$('toOp').onclick=()=>foAns('o');$('foReset').onclick=foStart;foStart();
+
+/* ================= 5. Structure puzzle ================= */
+const PZ=[
+  {topic:'🎻 Морин хуур',s:['Морин хуур бол монголчуудын хамгийн чухал хөгжмийн зэмсэг гэж би боддог.','Учир нь түүний ая тал нутаг, адуу малын тухай өгүүлдэг.','Жишээ нь, морин хуурын урлагийг ЮНЕСКО хүн төрөлхтний соёлын өвд бүртгэсэн.','Тиймээс бид морин хуураа сонсож, тоглож сурцгаая.']},
+  {topic:'🚀 Ж.Гүррагчаа',s:['Ж.Гүррагчаа бол бидний бахархах баатар гэж би боддог.','Учир нь тэр хичээнгүй, зоригтой байж мөрөөдлөө биелүүлсэн.','Жишээ нь, тэр 1981 онд сансарт ниссэн анхны монгол хүн юм.','Тиймээс бид ч хичээж сурвал том мөрөөдөлдөө хүрч чадна.']},
+  {topic:'🍵 Өглөөний цай',s:['Өглөө бүр цайгаа заавал уух хэрэгтэй гэж би боддог.','Учир нь бидний биед өдрийн эхний хүч хэрэгтэй.','Жишээ нь, өглөө цайгаа уусан өдөр би хичээл дээр ядрахгүй, анхаарал сайн тавьдаг.','Тиймээс өглөө эрт босож, цайгаа ууцгаая.']}];
+const PN=[['o','💡 Үзэл бодол'],['r','❓ Шалтгаан'],['f','📊 Баримт'],['c','🎯 Дүгнэлт']];
+let pzR=0,pzN=0;
+function pzLoad(){const p=PZ[pzR];pzN=0;$('pzTopic').textContent=p.topic;$('pzRound').textContent='Үе '+(pzR+1)+'/'+PZ.length;$('pzFb').textContent='';$('pzNext').disabled=true;
+  $('pzSlots').innerHTML=PN.map((n,i)=>`<div class="slot part-${n[0]}" id="slot${i}"><span class="sn">${i+1}. ${n[1]}</span><span></span></div>`).join('');
+  const pool=$('pzPool');pool.innerHTML='';shuffle(p.s.map((t,i)=>({t,i}))).forEach(o=>{const b=document.createElement('button');b.className='chip';b.textContent=o.t;
+    b.onclick=()=>{if(o.i===pzN){const sl=$('slot'+pzN);sl.classList.add('full');sl.lastChild.textContent=o.t;b.remove();pzN++;good();
+        if(pzN===4){$('pzFb').className='feedback ok';$('pzFb').textContent='🎉 Бүтэц зөв боллоо!';confetti(70);$('pzNext').disabled=pzR>=PZ.length-1;if(pzR>=PZ.length-1)$('pzFb').textContent='🏆 Гурван илтгэлийг бүгдийг нь зөв цэгцэллээ!'}
+        else{$('pzFb').className='feedback ok';$('pzFb').textContent='✅ Зөв! Одоо '+PN[pzN][1]+'?'}}
+      else{bad();b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);$('pzFb').className='feedback no';$('pzFb').textContent='🤔 Одоо '+(pzN+1)+'-р алхам: '+PN[pzN][1]+' хэрэгтэй.'}};pool.appendChild(b)})}
+$('pzNext').onclick=()=>{if(pzR<PZ.length-1){pzR++;pzLoad()}};pzLoad();
+
+/* ================= 6. Builder ================= */
+const TOPICS=[
+  {k:'hur',n:'🎻 Морин хуур',h:['морин хуур ямар зэмсэг вэ?','яагаад чухал вэ?','толгойн хэлбэр, чавхдас, ЮНЕСКО...','бид юу хийх вэ?']},
+  {k:'gut',n:'👢 Монгол гутал',h:['монгол гутлын талаар бодол','яагаад хэрэгтэй вэ?','хоншоор, ул, түрий...','бид юу хийх вэ?']},
+  {k:'sha',n:'🎲 Шагайн наадгай',h:['шагайн тоглоомын талаар бодол','яагаад тоглох хэрэгтэй вэ?','хонь, ямаа, морь, тэмээ; алаг мэлхий...','урилга, санал']},
+  {k:'gur',n:'🚀 Ж.Гүррагчаа',h:['түүний талаар бодол','яагаад бахархах вэ?','1981 он, сансрын нислэг...','бидэнд ямар сургамж вэ?']},
+  {k:'nom',n:'📚 Ном унших',h:['ном уншихын талаар бодол','яагаад хэрэгтэй вэ?','судалгаа, өөрийн жишээ...','санал, уриалга']},
+  {k:'pet',n:'🐶 Тэжээвэр амьтан',h:['тэжээвэр амьтны талаар бодол','яагаад тэжээх вэ?','өөрийн туршлага, жишээ...','санал, уриалга']}];
+const STARTERS=['гэж би боддог.','Учир нь ','Жишээ нь, ','Тиймээс '];
+const CN=[['o','1. 💡 Үзэл бодол'],['r','2. ❓ Шалтгаан'],['f','3. 📊 Баримт, жишээ'],['c','4. 🎯 Дүгнэлт']];
+let topicK=store.get('il_topic')||'hur';
+$('topics').innerHTML=TOPICS.map(t=>`<button class="btn ghost sm" data-tk="${t.k}">${t.n}</button>`).join('');
+$('bcards').innerHTML=CN.map((c,i)=>`<div class="bcard part-${c[0]}"><label>${c[1]} <button data-st="${i}" title="Эхлэх үг нэмэх">✨ ${STARTERS[i].trim()}</button></label><textarea id="bc${i}"></textarea></div>`).join('');
+for(let i=0;i<4;i++){const ta=$('bc'+i);ta.value=store.get('il_c'+i)||'';ta.addEventListener('input',()=>{store.set('il_c'+i,ta.value);bUpdate()})}
+document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{const i=+b.dataset.st,ta=$('bc'+i);
+  if(i===0){if(!/гэж би боддог/.test(ta.value))ta.value=(ta.value.trim().replace(/\.$/,'')+' '+STARTERS[0]).trim()}else if(!ta.value.startsWith(STARTERS[i].trim()))ta.value=STARTERS[i]+ta.value;
+  store.set('il_c'+i,ta.value);ta.focus();bUpdate()});
+function setTopic(k){topicK=k;store.set('il_topic',k);const t=TOPICS.find(x=>x.k===k)||TOPICS[0];
+  document.querySelectorAll('[data-tk]').forEach(b=>b.classList.toggle('on',b.dataset.tk===k));
+  for(let i=0;i<4;i++)$('bc'+i).placeholder='💭 '+t.h[i];bUpdate()}
+document.querySelectorAll('[data-tk]').forEach(b=>b.onclick=()=>setTopic(b.dataset.tk));
+function getCards(){return [0,1,2,3].map(i=>$('bc'+i).value.trim())}
+function bUpdate(){const c=getCards(),t=TOPICS.find(x=>x.k===topicK)||TOPICS[0];
+  $('preview').innerHTML=`<p style="border-color:var(--mg)"><b>${esc(t.n)}</b></p>`+c.map((s,i)=>`<p class="part-${CN[i][0]}">${s?esc(s):'<span class="empty">'+CN[i][1]+' ...</span>'}</p>`).join('');
+  const n=c.reduce((a,s)=>a+words(s),0);$('wcNum').textContent=n;const bar=$('wcBar');bar.style.width=Math.min(100,n/120*100)+'%';
+  let m,col;if(n===0){m='Товч уу? ✏️ Бичиж эхлээрэй';col='var(--muted)'}else if(n<30){m='🌱 Хэт богино — баримт нэм';col='var(--gold)'}else if(n<=80){m='✅ Товч, оновчтой!';col='var(--grn)'}else{m='✂️ Урт байна — танаарай';col='var(--org)'}
+  $('wcMsg').textContent=m;$('wcMsg').style.color=col;bar.style.background=col;
+  const filled=c.filter(Boolean).length;if(filled===4&&n>=30&&n<=80&&!bUpdate.cel){bUpdate.cel=true;confetti(60)}}
+setTopic(topicK);
+
+/* ================= 7. ON AIR ================= */
+let oaDur=60,oaLeft=60,oaRun=false,oaEnd=0,oaInt=null,oaCueIdx=0,oaAuto=true;
+function fmtS(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function drawOA(){const c=$('oaCount');c.textContent=fmtS(oaLeft);c.className='count'+(oaLeft<=0?' done':oaLeft<=10?' low':'');$('oaBar').style.width=Math.max(0,oaLeft/oaDur*100)+'%';
+  $('bigLamp').classList.toggle('on',oaRun);$('hdrLamp').classList.toggle('on',oaRun||tpOn);if(oaLeft<=0)c.textContent='ЦАГ ДУУСЛАА'}
+function drawCue(){const c=getCards(),i=oaCueIdx,el=$('cue');el.className='cue part-'+CN[i][0];
+  el.innerHTML=`<small>САНУУЛАХ КАРТ ${i+1}/4 · ${CN[i][1].slice(3)}</small><div>${c[i]?esc(c[i]):'<span style="color:var(--muted)">'+['«... гэж би боддог.»','«Учир нь ...»','«Жишээ нь, ...»','«Тиймээс ...»'][i]+'</span>'}</div>`}
+function oaStop(){oaRun=false;clearInterval(oaInt);$('oaGo').textContent=oaLeft<=0?'● Эхлэх':'● Үргэлжлүүлэх';drawOA()}
+$('oaGo').onclick=()=>{ac();if(oaRun){oaStop();return}if(oaLeft<=0){oaLeft=oaDur;oaCueIdx=0;oaAuto=true}
+  oaRun=true;oaEnd=Date.now()+oaLeft*1000;$('oaGo').textContent='⏸ Зогсоох';beep(1200,.12);let lastS=Math.ceil(oaLeft);
+  oaInt=setInterval(()=>{oaLeft=(oaEnd-Date.now())/1000;const s=Math.ceil(oaLeft);if(s!==lastS){lastS=s;if(s<=5&&s>0)beep(700,.08,.1)}
+    if(oaAuto){const k=Math.min(3,Math.floor((oaDur-oaLeft)/oaDur*4));if(k!==oaCueIdx){oaCueIdx=k;drawCue()}}
+    if(oaLeft<=0){oaLeft=0;oaStop();beep(440,.6,.2,'triangle')}drawOA()},100);drawOA()};
+$('oaReset').onclick=()=>{oaStop();oaLeft=oaDur;oaCueIdx=0;oaAuto=true;drawCue();$('oaGo').textContent='● Эхлэх';drawOA()};
+document.querySelectorAll('[data-dur]').forEach(b=>b.onclick=()=>{if(oaRun)return;oaDur=+b.dataset.dur;oaLeft=oaDur;document.querySelectorAll('[data-dur]').forEach(x=>x.classList.toggle('on',x===b));$('oaGo').textContent='● Эхлэх';drawOA()});
+$('cuePrev').onclick=()=>{oaAuto=false;oaCueIdx=Math.max(0,oaCueIdx-1);drawCue()};
+$('cueNext').onclick=()=>{oaAuto=false;oaCueIdx=Math.min(3,oaCueIdx+1);drawCue()};
+$('spName').value=store.get('il_name')||'';$('spName').addEventListener('input',()=>store.set('il_name',$('spName').value));
+let clapN=0;
+function applause(){const a=ac();if(!a)return;const dur=2.2,sr=a.sampleRate,buf=a.createBuffer(1,sr*dur,sr),d=buf.getChannelData(0);
+  for(let k=0;k<70;k++){const t0=Math.floor(Math.random()*(dur-.15)*sr),len=Math.floor(sr*.03),amp=rnd(.2,.6)*(1-t0/(dur*sr)*.7);for(let j=0;j<len;j++)d[t0+j]+=(Math.random()*2-1)*amp*Math.exp(-j/(len/5))}
+  const s=a.createBufferSource(),f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=1500;f.Q.value=.6;s.buffer=buf;s.connect(f).connect(a.destination);s.start()}
+$('clap').onclick=()=>{applause();confetti(90);clapN++;const nm=$('spName').value.trim();$('clapTxt').textContent='👏 '+(nm?nm+' — ':'')+'Браво! ('+clapN+')'};
+drawCue();drawOA();
+
+/* ================= 8. Rubric ================= */
+const RUB=[['🔊 Дуу хоолой','тод, чанга, түгдрэлгүй'],['👀 Нүдээр харилцах','сонсогч руугаа харсан'],['📊 Баримт','шалгаж болох жишээ хэлсэн'],['✂️ Товч','илүү үггүй, оновчтой'],['🎯 Дүгнэлт','санаагаа нэгтгэж дуусгасан']];
+const rubV=[0,0,0,0,0];
+$('rub').innerHTML=RUB.map((r,i)=>`<li><div><b>${r[0]}</b><small>${r[1]}</small></div><div class="stars" data-r="${i}">${'<button>⭐</button>'.repeat(3)}</div></li>`).join('');
+function rubDraw(){document.querySelectorAll('.stars').forEach(s=>{const i=+s.dataset.r;[...s.children].forEach((b,j)=>b.classList.toggle('on',j<rubV[i]))});
+  const t=rubV.reduce((a,b)=>a+b,0);$('rubTot').textContent=t;const all=rubV.every(v=>v>0);
+  $('rubVer').textContent=!all?'⭐ 5 шалгуурыг бүгдийг үнэлээрэй':t>=13?'🏆 Од илтгэгч!':t>=9?'👍 Сайн илтгэл!':'🌱 Дахин бэлдээд илүү сайн болно!'}
+document.querySelectorAll('.stars').forEach(s=>[...s.children].forEach((b,j)=>b.onclick=()=>{const i=+s.dataset.r;rubV[i]=rubV[i]===j+1?j:j+1;beep(500+rubV[i]*200,.08);rubDraw()}));
+function boardLoad(){try{return JSON.parse(store.get('il_board')||'[]')}catch(e){return[]}}
+function boardDraw(){const b=boardLoad();$('board').innerHTML=b.length?b.map(x=>`<li><span>${esc(x.n)}</span><b>${'⭐'.repeat(x.s>=13?3:x.s>=9?2:1)} ${x.s}/15</b></li>`).join(''):'<li style="color:var(--muted)">Одоохондоо хоосон</li>'}
+$('rubSave').onclick=()=>{if(!rubV.every(v=>v>0)){$('rubVer').textContent='⭐ Эхлээд бүх шалгуурыг үнэлээрэй';bad();return}
+  const t=rubV.reduce((a,b)=>a+b,0),b=boardLoad();b.push({n:$('spName').value.trim()||('Илтгэгч '+(b.length+1)),s:t});store.set('il_board',JSON.stringify(b));boardDraw();confetti(t>=13?110:50);good()};
+$('rubClr').onclick=()=>{rubV.fill(0);rubDraw();$('spName').value='';store.set('il_name','');$('rubName').textContent='—'};
+rubDraw();boardDraw();
+
+/* ================= 9. Grammar ================= */
+const GQ=[{w:'дуу',o:['дуул','дуулэ'],a:0,r:'эгшгээр төгссөн → +л'},{w:'хүрээ',o:['хүрээлэ','хүрээл'],a:1,r:'эгшгээр төгссөн → +л'},
+  {w:'бүлэг',o:['бүлэглэ','бүлэгл'],a:0,r:'эгшгийг ард нь'},{w:'ир',o:['ирил','ирлэ'],a:1,r:'эгшгийг ард нь'},
+  {w:'лааз',o:['лаазал','лаазла'],a:0,r:'эгшгийг өмнө нь'},{w:'цоож',o:['цоожло','цоожил'],a:1,r:'эгшгийг өмнө нь'},
+  {w:'тариа',o:['тариал','тариала'],a:0,r:'эгшгээр төгссөн → +л'},{w:'эцэс',o:['эцэсэл','эцэслэ'],a:1,r:'дүрмээс зөрдөг үг (х.79)'}];
+let gSc=0;
+function gBuild(){gSc=0;$('gScore').textContent=0;$('gTot').textContent=GQ.length;$('gq').innerHTML='';
+  GQ.forEach(q=>{const d=document.createElement('div');d.className='gitem';d.innerHTML=`<div class="w"><em>${q.w}</em> + л</div>`+q.o.map((o,i)=>`<button class="btn ghost sm" data-i="${i}">${o}</button>`).join('')+'<div class="r"></div>';
+    let done=false;d.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(done)return;const ok=+b.dataset.i===q.a;
+      if(ok){done=true;d.classList.remove('no');d.classList.add('ok');b.classList.add('on');gSc++;$('gScore').textContent=gSc;good();d.querySelector('.r').textContent='✅ '+q.r;if(gSc===GQ.length)confetti(90)}
+      else{d.classList.add('no');bad();d.querySelector('.r').textContent='❌ Дүрмийг харж дахин сонго'}});$('gq').appendChild(d)})}
+$('gReset').onclick=gBuild;gBuild();
+
+/* ================= 10. Reflection ================= */
+const VU=['😟 Айж байна','🙂 Жаахан','😊 Дунд','😃 Итгэлтэй','🌟 Од шиг!'];
+$('vu').innerHTML=VU.map((v,i)=>`<button style="height:${30+i*17}%" title="${v}">${i+1}</button>`).join('');
+function vuSet(n){[...$('vu').children].forEach((b,i)=>b.classList.toggle('on',i<n));$('vuFb').className='feedback ok';$('vuFb').textContent=n?VU[n-1]:'';store.set('il_vu',n)}
+[...$('vu').children].forEach((b,i)=>b.onclick=()=>{vuSet(i+1);beep(400+i*120,.1);if(i===4)confetti(60)});vuSet(+(store.get('il_vu')||0));
+$('finale').onclick=()=>{applause();confetti(160);$('finale').textContent='🎬 Баяртай! Дараагийн нэвтрүүлгээр уулзъя!'};
+
+/* ================= Confetti (studio sparkles) ================= */
+const cf=$('confetti'),cfx=cf.getContext('2d');let parts=[],cRun=false;
+function confetti(n){cf.width=innerWidth;cf.height=innerHeight;const cols=['#22d3ee','#ff3ea5','#ffd23f','#ffffff','#3ee08a'];
+  for(let i=0;i<n;i++)parts.push({x:innerWidth/2+rnd(-200,200),y:innerHeight*.5,vx:rnd(-8,8),vy:-rnd(5,18),s:rnd(5,10),c:cols[i%5],r:rnd(0,6),life:130,st:i%3===0});
+  if(!cRun){cRun=true;requestAnimationFrame(cStep)}}
+function cStep(){cfx.clearRect(0,0,cf.width,cf.height);parts.forEach(p=>{p.vy+=.38;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.r+=.12;p.life--;cfx.save();cfx.translate(p.x,p.y);cfx.rotate(p.r);cfx.fillStyle=p.c;
+    if(p.st){cfx.beginPath();for(let k=0;k<4;k++){cfx.lineTo(0,-p.s);cfx.rotate(Math.PI/4);cfx.lineTo(0,-p.s/3);cfx.rotate(Math.PI/4)}cfx.fill()}else cfx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cfx.restore()});
+  parts=parts.filter(p=>p.life>0&&p.y<cf.height+20);if(parts.length)requestAnimationFrame(cStep);else{cRun=false;cfx.clearRect(0,0,cf.width,cf.height)}}
+
+go(0);
+</script>
+</body>
+</html>
